@@ -1,92 +1,132 @@
-
-import random
-
 from collections import defaultdict
+import time
 
 from sklearn.cluster import KMeans
+from sklearn import datasets
+
 import numpy as np
 
 from utils.misc_utils import distance, check_random_state
-from utils.data_generater import makeRandomPoint
 
 
 
 class KMeansBase(object):
 
-    def __init__(self, n_clusters = 8, init="random", max_iter = 300, random_state = None):
-        self.k = n_clusters
-        self.init = init
-        self.max_iter = max_iter
-        self.random_state = random_state
+    def __init__(self, n_clusters = 8, init="random", max_iter = 300, random_state = None, n_init = 10, tol = 1e-4):
+        self.k = n_clusters # 聚类个数
+        self.init = init # 输出化方式
+        self.max_iter = max_iter # 最大迭代次数
+        self.random_state = random_state #随机数
+        self.n_init = n_init # 进行多次聚类，选择最好的一次
+        self.tol = tol # 停止聚类的阈值
 
-
+    # fit对train建立模型
     def fit(self, dataset):
+        self.tol = self._tolerance(dataset, self.tol)
+
+        bestError = None
+        bestCenters = None
+        bestLabels = None
+        for i in range(self.n_init):
+            labels, centers, error = self._kmeans(dataset)
+            if bestError == None or error < bestError:
+                bestError = error
+                bestCenters = centers
+                bestLabels = labels
+        self.centers = bestCenters
+        return bestLabels, bestCenters, bestError
+
+    # predict根据训练好的模型预测新的数据
+    def predict(self, X):
+        return self.update_labels_error(X, self.centers)[0]
+
+    # 合并fit和predict
+    def fit_predict(self, dataset):
+        self.fit(dataset)
+        return self.predict(dataset)
+
+    # kmeans的主要方法，完成一次聚类的过程
+    def _kmeans(self, dataset):
         self.dataset = np.array(dataset)
-        k_points = self._init_centroids(dataset)
-        assignments = self.assign_points(dataset, k_points)
-        old_assignments = None
+        bestError = None
+        bestCenters = None
+        bestLabels = None
+        centerShiftTotal = 0
+        centers = self._init_centroids(dataset)
+
         for i in range(self.max_iter):
-            if assignments == old_assignments:
+            oldCenters = centers.copy()
+            labels, error = self.update_labels_error(dataset, centers)
+            centers = self.update_centers(dataset, labels)
+
+            if bestError == None or error < bestError:
+                bestLabels = labels.copy()
+                bestCenters = centers.copy()
+                bestError = error
+
+            ## oldCenters和centers的偏移量
+            centerShiftTotal = np.linalg.norm(oldCenters - centers) ** 2
+            if centerShiftTotal <= self.tol:
                 break
-            error = self.update_error(dataset, assignments)
-            print("error", error)
-            new_centers = self.update_centers(dataset, assignments)
-            old_assignments = assignments
-            assignments = self.assign_points(dataset, new_centers)
-        return zip(assignments, dataset)
+
+        #由于上面的循环，最后一步更新了centers，所以如果和旧的centers不一样的话，再更新一次labels，error
+        if centerShiftTotal > 0:
+            bestLabels, bestError = self.update_labels_error(dataset, bestCenters)
+
+        return bestLabels, bestCenters, bestError
 
 
     # k个数据点，随机生成
     def _init_centroids(self, dataset):
         random_state = check_random_state(self.random_state)
         n_samples = dataset.shape[0]
+        centers = []
         if self.init == "random":
             seeds = random_state.permutation(n_samples)[:self.k]
             centers = dataset[seeds]
         elif self.init == "k-means++":
             centers = []
 
-        return centers
+        return np.array(centers)
 
 
-    # 输入：points是一个聚类的点，维度相同
-    # 输出：这些点的中心点
-    def point_avg(self, points):
-        return np.mean(points, axis=0)
+    # 把tol和dataset相关联
+    def _tolerance(self, dataset, tol):
+        variances = np.var(dataset, axis=0)
+        return np.mean(variances) * tol
 
 
-    #输入：data_set是数据集的点，assignments是每个点在当前归为的类别
-    #输出：新的中心点list
-    def update_centers(self, dataset, assignments):
-        new_means = defaultdict(list)
-        centers = []
-        for assignment, point in zip(assignments, dataset):
-            new_means[assignment].append(point)
-
-        for points in new_means.values():
-            newCenter = self.point_avg(points)
-            centers.append(newCenter)
-
-        return centers
-
-    #输入：data_set是数据集的点，assignments是每个点在当前归为的类别
-    #输出：新的误差值
-    def update_error(self, dataset, assignments):
+    # 更新每个点的标签，和计算误差
+    def update_labels_error(self, dataset, centers):
+        labels = self.assign_points(dataset, centers)
         new_means = defaultdict(list)
         error = 0
-        for assignment, point in zip(assignments, dataset):
+        for assignment, point in zip(labels, dataset):
             new_means[assignment].append(point)
 
         for points in new_means.values():
-            newCenter = self.point_avg(points)
+            newCenter = np.mean(points, axis=0)
             error += np.sqrt(np.sum(np.square(points - newCenter)))
 
-        return error
+        return labels, error
 
-    #输入：data_set原始数据集，centers所有的中心点
-    #输出：每个点对应的聚类类别
+    # 更新中心点
+    def update_centers(self, dataset, labels):
+        new_means = defaultdict(list)
+        centers = []
+        for assignment, point in zip(labels, dataset):
+            new_means[assignment].append(point)
+
+        for points in new_means.values():
+            newCenter = np.mean(points, axis=0)
+            centers.append(newCenter)
+
+        return np.array(centers)
+
+
+    # 分配每个点到最近的center
     def assign_points(self, dataset, centers):
-        assignments = []
+        labels = []
         for point in dataset:
             shortest = float("inf")  # 正无穷
             shortest_index = 0
@@ -95,8 +135,8 @@ class KMeansBase(object):
                 if val < shortest:
                     shortest = val
                     shortest_index = i
-            assignments.append(shortest_index)
-        return assignments
+            labels.append(shortest_index)
+        return labels
 
 
 
@@ -104,13 +144,21 @@ class KMeansBase(object):
 
 
 if __name__ == "__main__":
-
     iris = datasets.load_iris()
     km = KMeansBase(3)
-    for k in km.fit(iris.data):
-        print(k)
+    startTime = time.time()
+    labels = km.fit_predict(iris.data)
+    print("my time",time.time() - startTime)
+    print(np.array(labels))
 
-    kmeans = KMeans(init='k-means++', n_clusters= 10, n_init=10)
+    kmeans = KMeans(init='k-means++', n_clusters= 3, n_init=10)
+    startTime = time.time()
+    label = kmeans.fit_predict(iris.data)
+    print("sklearn time",time.time() - startTime)
+
+    print(label)
+
+
 
 # pointList = []
 # numPoints = 10000
