@@ -6,17 +6,17 @@ from sklearn import datasets
 
 import numpy as np
 
-from utils.misc_utils import distance, check_random_state
+from utils.misc_utils import distance, check_random_state, sortLabel
 
 
 
 class KMeansBase(object):
 
-    def __init__(self, n_clusters = 8, init="random", max_iter = 300, random_state = None, n_init = 10, tol = 1e-4):
+    def __init__(self, n_clusters = 8, init = "random", max_iter = 300, random_state = None, n_init = 10, tol = 1e-4):
         self.k = n_clusters # 聚类个数
         self.init = init # 输出化方式
         self.max_iter = max_iter # 最大迭代次数
-        self.random_state = random_state #随机数
+        self.random_state = check_random_state(random_state) #随机数
         self.n_init = n_init # 进行多次聚类，选择最好的一次
         self.tol = tol # 停止聚类的阈值
 
@@ -78,15 +78,13 @@ class KMeansBase(object):
 
     # k个数据点，随机生成
     def _init_centroids(self, dataset):
-        random_state = check_random_state(self.random_state)
         n_samples = dataset.shape[0]
         centers = []
         if self.init == "random":
-            seeds = random_state.permutation(n_samples)[:self.k]
+            seeds = self.random_state.permutation(n_samples)[:self.k]
             centers = dataset[seeds]
         elif self.init == "k-means++":
-            centers = []
-
+            pass
         return np.array(centers)
 
 
@@ -131,7 +129,7 @@ class KMeansBase(object):
             shortest = float("inf")  # 正无穷
             shortest_index = 0
             for i in range(len(centers)):
-                val = distance(point, centers[i])
+                val = distance(point[np.newaxis], centers[i])
                 if val < shortest:
                     shortest = val
                     shortest_index = i
@@ -139,38 +137,17 @@ class KMeansBase(object):
         return labels
 
 
-
-
-
-
 if __name__ == "__main__":
+    # 用iris数据集测试准确度和速度
     iris = datasets.load_iris()
     km = KMeansBase(3)
     startTime = time.time()
     labels = km.fit_predict(iris.data)
-    print("my time",time.time() - startTime)
-    print(np.array(labels))
+    print("km time", time.time() - startTime)
+    print(np.array(sortLabel(labels)))
 
-    kmeans = KMeans(init='k-means++', n_clusters= 3, n_init=10)
+    kmeans = KMeans(init='k-means++', n_clusters=3, n_init=10)
     startTime = time.time()
     label = kmeans.fit_predict(iris.data)
-    print("sklearn time",time.time() - startTime)
-
-    print(label)
-
-
-
-# pointList = []
-# numPoints = 10000
-# dim = 1000
-# numClusters = 10
-# k = 0
-# for i in range(0,numClusters):
-#     num = int(numPoints/numClusters)
-#     p = makeRandomPoint(num,dim,k)
-#     k += 5
-#     pointList += p.tolist()
-#
-# start = time.time()
-# config= k_means(np.array(pointList), numClusters)
-# print("Time taken:",time.time() - start)
+    print("sklearn time", time.time() - startTime)
+    print(sortLabel(label))

@@ -2,20 +2,10 @@ import numpy as np
 import numbers
 
 def distance(point1, point2):
-    return np.sqrt(np.sum(np.square(point1 - point2)))
+    return np.sqrt(np.sum(np.square(point1 - point2), axis=1))
 
 
 def check_random_state(seed):
-    """Turn seed into a np.random.RandomState instance
-
-    Parameters
-    ----------
-    seed : None | int | instance of RandomState
-        If seed is None, return the RandomState singleton used by np.random.
-        If seed is an int, return a new RandomState instance seeded with seed.
-        If seed is already a RandomState instance, return it.
-        Otherwise raise ValueError.
-    """
     if seed is None or seed is np.random:
         return np.random.mtrand._rand
     if isinstance(seed, (numbers.Integral, np.integer)):
@@ -24,3 +14,19 @@ def check_random_state(seed):
         return seed
     raise ValueError('%r cannot be used to seed a numpy.random.RandomState'
                      ' instance' % seed)
+
+
+def sortLabel(label):
+    label = np.array(label)
+    labelOld = []
+    labelNum = len(list(set(label)))
+    for i in label:
+        if i not in labelOld:
+            labelOld.append(i)
+        if len(labelOld) == labelNum:
+            break
+
+    labelNew = sorted(labelOld)
+    for i, old in enumerate(labelOld):
+        label[label == old] = labelNew[i] + 10000
+    return label - 10000
