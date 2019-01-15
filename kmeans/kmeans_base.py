@@ -2,6 +2,7 @@ from collections import defaultdict
 import time
 
 from sklearn.cluster import KMeans
+from sklearn.manifold import TSNE
 from sklearn import datasets
 
 import numpy as np
@@ -151,3 +152,7 @@ if __name__ == "__main__":
     label = kmeans.fit_predict(iris.data)
     print("sklearn time", time.time() - startTime)
     print(sortLabel(label))
+
+    tsne = TSNE(n_components=2, init='pca', random_state=0)
+    start_time = time.time()
+    X_tsne = tsne.fit_transform(X)

@@ -1,4 +1,3 @@
-from collections import defaultdict
 import time
 
 from sklearn.cluster import KMeans
@@ -6,7 +5,7 @@ from sklearn import datasets
 
 import numpy as np
 
-from utils.misc_utils import distance, check_random_state, sortLabel
+from utils.misc_utils import distance, sortLabel
 from kmeans.kmeans_base import KMeansBase
 
 
@@ -85,14 +84,14 @@ class KMeansPlusPlus(KMeansBase):
 
 
 if __name__ == "__main__":
-    iris = datasets.load_iris()
+    iris = datasets.load_boston()
     km1 = KMeansBase(3)
     startTime = time.time()
     labels = km1.fit_predict(iris.data)
     print("km1 time",time.time() - startTime)
     print(np.array(sortLabel(labels)))
 
-    km2 = KMeansBase(3, init="k-means++")
+    km2 = KMeansPlusPlus(3, init="k-means++")
     startTime = time.time()
     labels = km2.fit_predict(iris.data)
     print("km2 time", time.time() - startTime)
