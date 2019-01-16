@@ -103,7 +103,7 @@ class GMMPenality(object):
         return np.sum(logNorm)
 
 
-    #计算高斯密度概率函数，样本的高斯概率密度函数，其实就是每个mu,sigma的一维高斯的和
+    #计算高斯密度概率函数，样本的高斯概率密度函数，其实就是每个一维mu,sigma的高斯的和
     def log_prob(self, X, mu, sigma):
         N, D = X.shape
         logRes = np.zeros(N)
