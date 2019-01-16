@@ -15,8 +15,8 @@ def checkResult():
     for fileName in fileNameList:
         X = np.loadtxt(fileName)
         searchK = 3
-        penalty = [0, 1, 2, 4]
-        epoch = 3
+        penalty = [0, 1, 2]
+        epoch = 2
         maxLogLikelihood = float('-inf')
         maxResult = None
         maxK = 0
