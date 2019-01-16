@@ -1,5 +1,6 @@
 import numpy as np
 import numbers
+from scipy.stats import multivariate_normal
 
 def distance(point1, point2):
     return np.sqrt(np.sum(np.square(point1 - point2), axis=1))
@@ -30,3 +31,16 @@ def sortLabel(label):
     for i, old in enumerate(labelOld):
         label[label == old] = labelNew[i] + 10000
     return label - 10000
+
+def prob(x, mu, cov):
+    norm = multivariate_normal(mean=mu, cov=cov)
+    return norm.pdf(x)
+
+def log_prob(x, mu, cov):
+    norm = multivariate_normal(mean=mu, cov=cov)
+    return norm.logpdf(x)
+
+
+def log_weight_prob(x, alpha, mu, cov):
+    N = x.shape[0]
+    return np.mat(np.log(alpha) + log_prob(x, mu, cov)).reshape([N, 1])
