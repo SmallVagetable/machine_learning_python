@@ -4,4 +4,4 @@
 结果在perceptron.ipynb中展示
 
 # 相关博客
-#### [1. 感知机原理（Perceptron）](https://www.cnblogs.com/huangyc/p/9706575.html)
+#### [感知机原理（Perceptron）](https://www.cnblogs.com/huangyc/p/9706575.html)
