@@ -3,8 +3,7 @@ import time
 from collections import Counter
 from collections import namedtuple
 from knn.knn_base import KNN
-from random import random
-
+from utils.data_generater import random_points
 
 # kd-tree每个结点中主要包含的数据结构如下
 class KdNode(object):
@@ -14,10 +13,20 @@ class KdNode(object):
         self.left = left  # 该结点分割超平面左子空间构成的kd-tree
         self.right = right  # 该结点分割超平面右子空间构成的kd-tree
         self.label = label # 该节点的标签
+        self.visit = False
+
+
+    def setVisit(self, isVisite):
+        self.visit = isVisite
+
 
 
 class KdTree(object):
     def __init__(self, X, y):
+        if isinstance(X, np.ndarray):
+            X = X.tolist()
+        if isinstance(y, np.ndarray):
+            y = y.tolist()
         self.root = self.createNode(0, X, y)  # 从第0维分量开始构建kd树,返回根节点
 
 
@@ -60,27 +69,21 @@ class KNNKdTree(KNN):
         self.kdTree = KdTree(self.X_train, self.y_train)
 
 
-    def predict1(self, X):
-        # 取出n个点
+    def predict(self, point):
         knn_list = []
         for i in range(self.n):
-            dist = np.linalg.norm(X - self.X_train[i], ord=self.p)
-            knn_list.append((dist, self.y_train[i]))
-
-        for i in range(self.n, len(self.X_train)):
-            max_index = knn_list.index(max(knn_list, key=lambda x: x[0]))
-            dist = np.linalg.norm(X - self.X_train[i], ord=self.p)
-            if knn_list[max_index][0] > dist:
-                knn_list[max_index] = (dist, self.y_train[i])
+            node = self.find_nearest(self.kdTree, point)
+            node.nearest_node.setVisit(True)
+            knn_list.append(node.nearest_node)
+            # nearest_node = node.nearest_node
+            # print("node point = %s label = %s, dist = %s"%([round(d, 5) for d in nearest_node.dom_elt],
+            #                                                nearest_node.label,
+            #                                                round(node.nearest_dist, 5)))
 
         # 统计
-        knn = [k[-1] for k in knn_list]
-        count_pairs = Counter(knn)
-        max_count = sorted(count_pairs, key=lambda x: x)[-1]
-        return max_count
+        knn = [k.label for k in knn_list]
+        return Counter(knn).most_common()[0][0]
 
-    def predict(self, point):
-        return self.find_nearest(self.kdTree, point)
 
 
     def find_nearest(self, tree, point):
@@ -88,7 +91,7 @@ class KNNKdTree(KNN):
         result = namedtuple("Result_tuple", "nearest_node nearest_dist  nodes_visited")
 
         def travel(kd_node, target, max_dist):
-            if kd_node is None:
+            if kd_node is None or kd_node.visit:
                 return result(None, float("inf"), 0)  # python中用float("inf")和float("-inf")表示正负无穷
 
             nodes_visited = 1
@@ -147,14 +150,7 @@ class KNNKdTree(KNN):
         return right_count / len(X_test)
 
 
-# 产生一个k维随机向量，每维分量值在0~1之间
-def random_point(k):
-    return [random() for _ in range(k)]
 
-
-# 产生n个k维随机向量
-def random_points(k, n):
-    return [random_point(k) for _ in range(n)]
 
 
 def simpleTest():
@@ -162,22 +158,21 @@ def simpleTest():
     label = [0, 0, 0, 1, 1, 1]
     kdtree = KNNKdTree()
     kdtree.fit(data, label)
-    kdtree.kdTree.preorder()
-    ret = kdtree.predict([3, 4.5])
-    print("nearest Node:", ret.nearest_node.dom_elt, ret.nearest_node.label)
+    # kdtree.kdTree.preorder()
+    predict_label = kdtree.predict([3, 4.5])
+    print("predict label:", predict_label)
 
 def largeTest():
     N = 400000
     startTime = time.time()
-    data = random_points(3, N)
+    data = random_points(2, N)
     label = [0] * (N // 2) + [1] * (N // 2)
     kdtree2 = KNNKdTree()
     kdtree2.fit(data, label)
-    ret2 = kdtree2.predict([0.1, 0.5, 0.8])  # 四十万个样本点中寻找离目标最近的点
+    predict_label = kdtree2.predict([0.1, 0.5])  # 四十万个样本点中寻找离目标最近的点
 
     print("time: ", round(time.time() - startTime, 5), "s")
-    print(ret2)
-    print("nearest Node:", ret2.nearest_node.dom_elt, ret2.nearest_node.label)
+    print("predict label:", predict_label)
 
 
 def main():

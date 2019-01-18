@@ -32,10 +32,9 @@ class KNN(object):
 
         # 统计
         knn = [k[-1] for k in knn_list]
-        count_pairs = Counter(knn)
-        max_count = sorted(count_pairs, key=lambda x: x)[-1]
-        return max_count
+        return Counter(knn).most_common()[0][0]
 
+    # 统计准确度
     def score(self, X_test, y_test):
         right_count = 0
         for X, y in zip(X_test, y_test):
