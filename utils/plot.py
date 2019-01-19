@@ -32,3 +32,14 @@ def plot_decision_regions(model, X, y, resolution=0.02):
                     alpha=0.8, c=cmap(idx),
                     marker=markers[idx], label=cl)
     plt.show()
+
+
+def plot_knn_predict(model, dataset, label, x):
+    dataset = np.array(dataset)
+    plt.scatter(x[0], x[1], c="r", marker='*', s = 40)  # 测试点
+    near, predict_label = model.predict(x)  # 设置临近点的个数
+    plt.scatter(dataset[:,0], dataset[:,1], c=label, s = 50)  # 画所有的数据点
+    for n in near:
+        print(n)
+        plt.scatter(n.data[0], n.data[1], c="r", marker='+', s = 40)  # k个最近邻点
+    plt.show()

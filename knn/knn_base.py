@@ -2,6 +2,7 @@ import numpy as np
 from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
 from collections import Counter
+from sklearn.neighbors import KNeighborsClassifier,KDTree
 
 class KNN(object):
     def __init__(self, n_neighbors=3, p=2):
