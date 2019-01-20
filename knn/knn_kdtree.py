@@ -45,30 +45,43 @@ class KdTree:
             self.preOrder(node.lchild)
             self.preOrder(node.rchild)
 
-    # 搜索kdtree的前n个近的点
+    # 搜索kdtree的前count个近的点
     def search(self, x, count = 1):
         nearest = []
         for i in range(count):
             nearest.append([-1, None])
-        self.nearest = np.array(nearest) # 初始化n个点
+        # 初始化n个点，nearest是按照距离递减的方式
+        self.nearest = np.array(nearest)
 
         def recurve(node):
             if node is not None:
+                # 计算当前点的维度axis
                 axis = node.depth % self.n
+                # 计算测试点和当前点在axis维度上的差
                 daxis = x[axis] - node.data[axis]
+                # 如果小于进左子树，大于进右子树
                 if daxis < 0:
                     recurve(node.lchild)
                 else:
                     recurve(node.rchild)
-
+                # 计算预测点x到当前点的距离dist
                 dist = np.sqrt(np.sum(np.square(x - node.data)))
                 for i, d in enumerate(self.nearest):
+                    # 如果有比现在最近的n个点更近的点，更新最近的点
                     if d[0] < 0 or dist < d[0]:
+                        # 插入第i个位置的点
                         self.nearest = np.insert(self.nearest, i, [dist, node], axis=0)
+                        # 删除最后一个多出来的点
                         self.nearest = self.nearest[:-1]
                         break
 
+                # 统计距离为-1的个数n
                 n = list(self.nearest[:, 0]).count(-1)
+                '''
+                self.nearest[-n-1, 0]是当前nearest中已经有的最近点中，距离最大的点。
+                self.nearest[-n-1, 0] > abs(daxis)代表以x为圆心，self.nearest[-n-1, 0]为半径的圆与axis
+                相交，说明在左右子树里面有比self.nearest[-n-1, 0]更近的点
+                '''
                 if self.nearest[-n-1, 0] > abs(daxis):
                     if daxis < 0:
                         recurve(node.rchild)

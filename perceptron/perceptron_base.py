@@ -9,22 +9,17 @@ class PerceptronBase(object):
     原始形态感知机
     """
     def __init__(self, eta=0.1, n_iter=50):
-        self.eta = eta  # 学习率
-        self.n_iter = n_iter  # 迭代次数
+        # 学习率
+        self.eta = eta
+        # 迭代次数
+        self.n_iter = n_iter
 
     def fit(self, X, y):
-        """
-        拟合函数，使用训练集来拟合模型
-        :param X:training sets
-        :param y:training labels
-        :return:self
-        """
-        # X's each col represent a feature
-        # initialization wb(weight plus bias)
+        # 初始化参数w，b
         self.w = np.zeros(X.shape[1])
         self.b = 0
-        # the main process of fitting
-        self.errors_ = []  # store the errors for each iteration
+        # 记录所有error
+        self.errors_ = []
         for _ in range(self.n_iter):
             errors = 0
             for xi, yi in zip(X, y):
@@ -39,19 +34,9 @@ class PerceptronBase(object):
         return self
 
     def sign(self, xi):
-        """
-        计算净输入
-        :param xi:
-        :return:净输入
-        """
         return np.dot(xi, self.w) + self.b
 
     def predict(self, xi):
-        """
-        计算预测值
-        :param xi:
-        :return:-1 or 1
-        """
         return np.where(self.sign(xi) <= 0.0, -1, 1)
 
 
