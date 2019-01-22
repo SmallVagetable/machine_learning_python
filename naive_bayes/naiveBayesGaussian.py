@@ -1,21 +1,11 @@
-import math
 import numpy as np
 from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
 from scipy.stats import norm
 
-class NaiveBayes:
+class GaussianNaiveBayes(object):
     def __init__(self):
         self.model = None
-
-    # 数学期望
-    @staticmethod
-    def mean(X):
-        return np.mean(X)
-
-    # 标准差（方差）
-    def stdev(self, X):
-        return np.std(X)
 
     # 概率密度函数
     def gaussian_probability(self, x, mean, stdev):
@@ -23,7 +13,7 @@ class NaiveBayes:
 
     # 处理X_train
     def summarize(self, train_data):
-        summaries = [(self.mean(i), self.stdev(i)) for i in zip(*train_data)]
+        summaries = [(np.mean(X), np.std(X)) for X in zip(*train_data)]
         return summaries
 
     # 分类别求出数学期望和标准差
@@ -65,7 +55,7 @@ if __name__ == "__main__":
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
     print(len(X_train))
     print(len(X_test))
-    model = NaiveBayes()
+    model = GaussianNaiveBayes()
     model.fit(X_train, y_train)
     print(model.predict([4.4, 3.2, 1.3, 0.2]))
     print(model.score(X_test, y_test))
