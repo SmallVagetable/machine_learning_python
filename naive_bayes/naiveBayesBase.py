@@ -3,7 +3,7 @@ from utils.word_utils import *
 
 
 
-class NavieBayesNase(object):
+class NaiveBayesBase(object):
 
     def __init__(self):
         pass
@@ -86,7 +86,7 @@ def checkNB():
     for postinDoc in listOPosts:
         trainMat.append(setOfWord2Vec(myVocabList, postinDoc))
 
-    nb = NavieBayesNase()
+    nb = NaiveBayesBase()
     nb.fit(np.array(trainMat), np.array(lisClasses))
 
     testEntry1 = ['love', 'my', 'dalmation']
