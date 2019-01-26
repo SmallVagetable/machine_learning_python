@@ -6,3 +6,5 @@
 ### [感知机的基本形式和对偶形式的实现](https://github.com/SmallVagetable/machine_learning_python/tree/master/perceptron)
 ### [Kmeans和Kmeans++的实现](https://github.com/SmallVagetable/machine_learning_python/tree/master/kmeans)
 ### [EM GMM高斯混合和GMM+LASSO的实现](https://github.com/SmallVagetable/machine_learning_python/tree/master/em)
+### [实现朴素贝叶斯的基本算法和高斯混合朴素贝叶斯算法](https://github.com/SmallVagetable/machine_learning_python/tree/master/naive_bayes)
+### [实现决策树的基本算法](https://github.com/SmallVagetable/machine_learning_python/tree/master/decision_tree)
