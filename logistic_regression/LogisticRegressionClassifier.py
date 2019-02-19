@@ -4,7 +4,7 @@ from math import exp
 from utils.data_generater import *
 
 
-class LogisticRegressionClassifier:
+class LogisticRegressionClassifier(object):
     def __init__(self, max_iter=200, learning_rate=0.01):
         # 最大迭代次数
         self.max_iter = max_iter

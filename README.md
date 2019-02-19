@@ -8,3 +8,6 @@
 ### [EM GMM高斯混合和GMM+LASSO的实现](https://github.com/SmallVagetable/machine_learning_python/tree/master/em)
 ### [实现朴素贝叶斯的基本算法和高斯混合朴素贝叶斯算法](https://github.com/SmallVagetable/machine_learning_python/tree/master/naive_bayes)
 ### [实现决策树的基本算法](https://github.com/SmallVagetable/machine_learning_python/tree/master/decision_tree)
+### [实现adaboost基本算法](https://github.com/SmallVagetable/machine_learning_python/tree/master/adaboost)
+### [实现svm基本算法](https://github.com/SmallVagetable/machine_learning_python/tree/master/support_vector_machine)
+### [实现逻辑回归基本算法](https://github.com/SmallVagetable/machine_learning_python/tree/master/logistic_regression)

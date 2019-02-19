@@ -1,9 +1,8 @@
 
 from sklearn.svm import SVC
-
 from utils.data_generater import *
 
-class SVM:
+class SVM(object):
     def __init__(self, max_iter=100, kernel='linear'):
         self.max_iter = max_iter
         self._kernel = kernel

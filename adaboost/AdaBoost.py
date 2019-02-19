@@ -2,7 +2,7 @@ from sklearn.ensemble import AdaBoostClassifier
 
 from utils.data_generater import *
 
-class AdaBoost:
+class AdaBoost(object):
     def __init__(self, n_estimators=50, learning_rate=1.0):
         self.clf_num = n_estimators
         self.learning_rate = learning_rate
