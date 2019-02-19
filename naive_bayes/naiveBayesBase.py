@@ -80,14 +80,14 @@ def loadDataSet():
 
 def checkNB():
     '''测试'''
-    listOPosts, lisClasses = loadDataSet()
-    myVocabList = createVocabList(listOPosts)
+    listPosts, listClasses = loadDataSet()
+    myVocabList = createVocabList(listPosts)
     trainMat = []
-    for postinDoc in listOPosts:
-        trainMat.append(setOfWord2Vec(myVocabList, postinDoc))
+    for postDoc in listPosts:
+        trainMat.append(setOfWord2Vec(myVocabList, postDoc))
 
     nb = NaiveBayesBase()
-    nb.fit(np.array(trainMat), np.array(lisClasses))
+    nb.fit(np.array(trainMat), np.array(listClasses))
 
     testEntry1 = ['love', 'my', 'dalmation']
     thisDoc = np.array(setOfWord2Vec(myVocabList, testEntry1))

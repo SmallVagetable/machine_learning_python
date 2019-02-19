@@ -78,20 +78,24 @@ class DTreeID3(object):
 
     def train(self, datasets, node):
         labely = datasets.columns[-1]
+        # 判断样本是否为同一类输出Di，如果是则返回单节点树T。标记类别为Di
         if len(datasets[labely].value_counts()) == 1:
             node.data = datasets[labely]
             node.y = datasets[labely][0]
             return
+        # 判断特征是否为空，如果是则返回单节点树T，标记类别为样本中输出类别D实例数最多的类别
         if len(datasets.columns[:-1]) == 0:
             node.data = datasets[labely]
             node.y = datasets[labely].value_counts().index[0]
             return
+        # 计算A中的各个特征（一共n个）对输出D的信息增益，选择信息增益最大的特征Ag。
         gainmaxi, gainmax = self.info_gain_train(datasets, datasets.columns)
-        if gainmax <= self.epsilon:  # 若信息增益（互信息）为0意为输入特征x完全相同而标签y相反
+        # 如果Ag的信息增益小于阈值ε，则返回单节点树T，标记类别为样本中输出类别D实例数最多的类别。
+        if gainmax <= self.epsilon:
             node.data = datasets[labely]
             node.y = datasets[labely].value_counts().index[0]
             return
-
+        # 按特征Ag的不同取值Agi将对应的样本输出D分成不同的类别Di。每个类别产生一个子节点。对应特征值为Agi。返回增加了节点的数T。
         vc = datasets[datasets.columns[gainmaxi]].value_counts()
         for Di in vc.index:
             node.label = gainmaxi
