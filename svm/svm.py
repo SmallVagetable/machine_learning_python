@@ -1,5 +1,7 @@
-from utils.data_generater import *
+
 from sklearn.svm import SVC
+
+from utils.data_generater import *
 
 class SVM:
     def __init__(self, max_iter=100, kernel='linear'):
